@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/nft/[id].tsx": {
+    "api/nft/[id]": {
       "includeFiles": "public/img/certificate.jpg"
     }
   }
