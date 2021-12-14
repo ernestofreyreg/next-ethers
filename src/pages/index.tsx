@@ -1,58 +1,112 @@
 import * as React from 'react'
 import { NextPage } from 'next'
 import { ethers } from 'ethers'
-import Greeter from '../../Greeter.json'
-import { Container } from '@material-ui/core'
+import Learnpack from '../../Learnpack.json'
+import {
+  Button,
+  Container,
+  makeStyles,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@material-ui/core'
+import { useRouter } from 'next/router'
 
-// const greeterAddress = '0x5fbdb2315678afecb367f032d93f642f64180aa3' // Localhost
-const greeterAddress = '0xf6E539427817335f87f16E42c05505E3AEB8047f' // Ropsten
+const learnpackAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3' // Localhost
+
+const useStyles = makeStyles({
+  table: {
+    minWidth: 650
+  }
+})
+
+function createData(name: string, balance: string) {
+  return { name, balance }
+}
+
+const TOKEN_NAMES = [
+  'CERTIFICATE_ID',
+  'GOVERNANCE_TOKEN',
+  'AUTHOR_TOKEN',
+  'EARNINGS_TOKEN',
+  'ANSWERING_TOKEN'
+]
 
 const IndexPage: NextPage = () => {
-  const [greeting, setGreetingValue] = React.useState('')
+  const classes = useStyles()
+  const router = useRouter()
+  const [rows, setRows] = React.useState([])
 
-  // request access to the user's MetaMask account
+  React.useEffect(() => {
+    fetchBalances()
+  }, [])
+
   async function requestAccount() {
     await global.ethereum.request({ method: 'eth_requestAccounts' })
   }
 
   // call the smart contract, read the current greeting value
-  async function fetchGreeting() {
+  async function fetchBalances() {
     if (typeof global.ethereum !== 'undefined') {
+      await requestAccount()
       const provider = new ethers.providers.Web3Provider(global.ethereum)
-      const contract = new ethers.Contract(greeterAddress, Greeter.abi, provider)
+      const contract = new ethers.Contract(learnpackAddress, Learnpack.abi, provider)
       try {
-        const data = await contract.greet()
-        console.log('data: ', data)
-        alert(data)
+        const balances = await Promise.all([
+          contract.balanceOf(global.ethereum.selectedAddress, 1),
+          contract.balanceOf(global.ethereum.selectedAddress, 2),
+          contract.balanceOf(global.ethereum.selectedAddress, 3),
+          contract.balanceOf(global.ethereum.selectedAddress, 4),
+          contract.balanceOf(global.ethereum.selectedAddress, 5)
+        ])
+        setRows(
+          balances.map((balance, index) => createData(TOKEN_NAMES[index], balance.toString()))
+        )
       } catch (err) {
         console.log('Error: ', err)
       }
     }
   }
 
-  // call the smart contract, send an update
-  async function setGreeting() {
-    if (!greeting) return
-    if (typeof global.ethereum !== 'undefined') {
-      await requestAccount()
-      const provider = new ethers.providers.Web3Provider(global.ethereum)
-      const signer = provider.getSigner()
-      const contract = new ethers.Contract(greeterAddress, Greeter.abi, signer)
-      const transaction = await contract.setGreeting(greeting)
-      await transaction.wait()
-      fetchGreeting()
-    }
+  const handleTransfer = () => {
+    router.push('/transfer')
   }
+
+  React.useEffect(() => {
+    global.ethereum.on('accountsChanged', function (accounts) {
+      fetchBalances()
+    })
+  }, [])
 
   return (
     <Container maxWidth='lg'>
-      <button onClick={fetchGreeting}>Fetch Greeting</button>
-      <button onClick={setGreeting}>Set Greeting</button>
-      <input
-        value={greeting}
-        onChange={e => setGreetingValue(e.target.value)}
-        placeholder='Set greeting'
-      />
+      <h1>Balances of {global?.ethereum?.selectedAddress}</h1>
+      <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label='simple table'>
+          <TableHead>
+            <TableRow>
+              <TableCell>Token</TableCell>
+              <TableCell align='right'>Amount</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map(row => (
+              <TableRow key={row.name}>
+                <TableCell component='th' scope='row'>
+                  {row.name}
+                </TableCell>
+                <TableCell align='right'>{row.balance}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Button onClick={fetchBalances}>Refresh </Button>
+      <Button onClick={handleTransfer}>Transfer</Button>
     </Container>
   )
 }
