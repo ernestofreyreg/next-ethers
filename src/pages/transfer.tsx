@@ -5,7 +5,7 @@ import Learnpack from '../../Learnpack.json'
 import { Button, Container, Input, MenuItem, Select, CircularProgress } from '@material-ui/core'
 import create from 'zustand'
 
-const learnpackAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3' // Localhost
+const learnpackAddress = process.env.LEARNPACK_ADDRESS
 
 function createData(name: string, balance: string) {
   return { name, balance }
@@ -19,8 +19,16 @@ const TOKEN_NAMES = [
   'ANSWERING_TOKEN'
 ]
 
-const useTransfer = create((set, get) => ({
-  transfering: false,
+interface Transfer {
+  transferring: boolean
+  balances: Array<{ name: string; balance: string }>
+  fetchBalances: () => Promise<void>
+  requestAccount: () => Promise<void>
+  transfer: (address: string, tokenId: number, amount: number) => Promise<void>
+}
+
+const useTransfer = create<Transfer>((set, get) => ({
+  transferring: false,
   balances: [],
 
   fetchBalances: async () => {
@@ -58,7 +66,7 @@ const useTransfer = create((set, get) => ({
         const provider = new ethers.providers.Web3Provider(global.ethereum)
         const signer = provider.getSigner()
         const contract = new ethers.Contract(learnpackAddress, Learnpack.abi, signer)
-        set({ transfering: true })
+        set({ transferring: true })
         const transaction = await contract.safeTransferFrom(
           global.ethereum.selectedAddress,
           address,
@@ -67,11 +75,11 @@ const useTransfer = create((set, get) => ({
           ethers.utils.arrayify(0)
         )
         await transaction.wait()
-        set({ transfering: false })
+        set({ transferring: false })
         get().fetchBalances()
       } catch (err) {
         console.log('Error: ', err)
-        set({ transfering: false })
+        set({ transferring: false })
       }
     }
   }
@@ -121,7 +129,7 @@ const IndexPage: NextPage = () => {
           onChange={event => setAmount(event.target.value)}
         />
       </div>
-      {transfer.transfering ? (
+      {transfer.transferring ? (
         <CircularProgress />
       ) : (
         <Button onClick={() => transfer.transfer(address, token, parseInt(amount))}>
