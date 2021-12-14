@@ -7,7 +7,7 @@ import nc from 'next-connect'
 export default nc<NextApiRequest, NextApiResponse>().get(async (req, res) => {
   const id = req.query.id as string
 
-  const image = await Jimp.read(join(__dirname, 'public', 'certificate.jpg'))
+  const image = await Jimp.read(join(__dirname, 'public', 'img', 'certificate.jpg'))
   const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK)
   image.print(
     font,
