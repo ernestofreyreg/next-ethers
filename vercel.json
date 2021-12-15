@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "src/pages/api/nft/[id].tsx": {
-      "includeFiles": "public/img/certificate.jpg"
-    }
-  }
-}
