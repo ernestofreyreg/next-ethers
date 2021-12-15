@@ -1,5 +1,4 @@
 import Jimp from 'jimp'
-import { join } from 'path'
 import { readFileSync } from 'fs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import nc from 'next-connect'
@@ -7,7 +6,7 @@ import nc from 'next-connect'
 export default nc<NextApiRequest, NextApiResponse>().get(async (req, res) => {
   const id = req.query.id as string
 
-  const file = readFileSync('./public/img/certificate-bg.png')
+  const file = readFileSync('public/img/certificate-bg.png')
   const image = await Jimp.read(file)
   const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK)
   const fontSmall = await Jimp.loadFont(Jimp.FONT_SANS_16_BLACK)
