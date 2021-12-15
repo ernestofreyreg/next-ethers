@@ -6,7 +6,7 @@ const info = {
     id: '1',
     name: 'Learnpack NFT',
     description: 'Learnpack NFT of competence',
-    image: 'https://croqueta.pw/api/nft/LearnpackNFT'
+    image: 'https://croqueta.pw/img/certificate-bg.png'
   },
   '2': {
     id: '2',
