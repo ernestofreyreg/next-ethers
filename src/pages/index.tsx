@@ -16,7 +16,7 @@ import {
 } from '@material-ui/core'
 import { useRouter } from 'next/router'
 
-const learnpackAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3' // Localhost
+const learnpackAddress = process.env.NEXT_PUBLIC_LEARNPACK_ADDRESS
 
 const useStyles = makeStyles({
   table: {
@@ -52,6 +52,7 @@ const IndexPage: NextPage = () => {
   // call the smart contract, read the current greeting value
   async function fetchBalances() {
     if (typeof global.ethereum !== 'undefined') {
+      console.log(learnpackAddress)
       await requestAccount()
       const provider = new ethers.providers.Web3Provider(global.ethereum)
       const contract = new ethers.Contract(learnpackAddress, Learnpack.abi, provider)

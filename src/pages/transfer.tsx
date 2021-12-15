@@ -5,7 +5,7 @@ import Learnpack from '../../Learnpack.json'
 import { Button, Container, Input, MenuItem, Select, CircularProgress } from '@material-ui/core'
 import create from 'zustand'
 
-const learnpackAddress = process.env.LEARNPACK_ADDRESS
+const learnpackAddress = process.env.NEXT_PUBLIC_LEARNPACK_ADDRESS
 
 function createData(name: string, balance: string) {
   return { name, balance }
